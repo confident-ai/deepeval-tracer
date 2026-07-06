@@ -33,35 +33,38 @@ permissions:
 
 tracker-id: tracing-pr
 
-# Widen the Squid egress allowlist so the callback step can reach our API.
+# Allow the callback step to reach our API.
 network:
   allowed:
     - defaults
     - api.confident-ai.com
     - eu.api.confident-ai.com
 
-github-app:
-  app-id: ${{ secrets.CONFIDENT_DEEPEVAL_APP_ID }}
-  private-key: ${{ secrets.CONFIDENT_DEEPEVAL_PRIVATE_KEY }}
-  owner: ${{ inputs.repoOwner }}
-  repositories:
-    - ${{ inputs.repoName }}
-
+# This repo must stay public: safe-outputs checks it out with the customer-scoped
+# token. github-app is scoped per-section (not top-level) so activation uses GITHUB_TOKEN.
 checkout:
   - repository: ${{ inputs.repoOwner }}/${{ inputs.repoName }}
     path: ./target-repo
-    # PR patch is generated from this checkout, not the runner repo at the root.
+    # Base the PR patch on this checkout.
     current: true
+    github-app:
+      app-id: ${{ secrets.CONFIDENT_DEEPEVAL_APP_ID }}
+      private-key: ${{ secrets.CONFIDENT_DEEPEVAL_PRIVATE_KEY }}
+      owner: ${{ inputs.repoOwner }}
+      repositories:
+        - ${{ inputs.repoName }}
 
 safe-outputs:
+  github-app:
+    app-id: ${{ secrets.CONFIDENT_DEEPEVAL_APP_ID }}
+    private-key: ${{ secrets.CONFIDENT_DEEPEVAL_PRIVATE_KEY }}
+    owner: ${{ inputs.repoOwner }}
+    repositories:
+      - ${{ inputs.repoName }}
   create-pull-request:
-    # A dynamic ${{ inputs }} value here compiles to an unexpanded literal in the
-    # agent's allowed-repos config, which then rejects every PR. "*" lets the agent
-    # target the repo it names; the repo-scoped App token is the real guardrail.
+    # Must be "*": a dynamic ${{ inputs }} value compiles to a literal and is rejected.
     target-repo: "*"
-    # The agent must edit dependency manifests (e.g. add deepeval to requirements.txt),
-    # which gh-aw protects by default and would otherwise divert the PR to an issue.
-    # The PR is reviewed before merge, so that review is the guardrail, not this gate.
+    # The agent edits dependency manifests (e.g. requirements.txt); PR review is the guardrail.
     protected-files: allowed
     title-prefix: "[tracing] "
     labels: ["confident-ai", "tracing"]
@@ -70,6 +73,12 @@ safe-outputs:
 tools:
   github:
     toolsets: [default]
+    github-app:
+      app-id: ${{ secrets.CONFIDENT_DEEPEVAL_APP_ID }}
+      private-key: ${{ secrets.CONFIDENT_DEEPEVAL_PRIVATE_KEY }}
+      owner: ${{ inputs.repoOwner }}
+      repositories:
+        - ${{ inputs.repoName }}
 
 timeout-minutes: 45
 strict: true
