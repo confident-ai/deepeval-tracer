@@ -12,10 +12,6 @@ on:
         description: "Name of the customer repository to instrument"
         required: true
         type: string
-      installationId:
-        description: "deepeval GitHub App installation id for the target repo"
-        required: true
-        type: string
       jobId:
         description: "Confident job id (nonce), echoed back unchanged in the callback"
         required: true
