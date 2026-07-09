@@ -2,6 +2,8 @@ import json
 import os
 import sys
 import urllib.request
+from enum import Enum
+from typing import Dict, List
 
 BASE = os.environ["CONFIDENT_BASE_URL"].rstrip("/")
 API_KEY = os.environ.get("CONFIDENT_API_KEY", "")
@@ -9,11 +11,16 @@ ALIAS = os.environ["DATASET_ALIAS"]
 VERSION = os.environ.get("DATASET_VERSION") or "latest"
 
 
-def headers():
+class RefType(str, Enum):
+    PULL_REQUEST = "PULL_REQUEST"
+    BRANCH = "BRANCH"
+
+
+def headers() -> Dict[str, str]:
     return {"Content-Type": "application/json", "confident-api-key": API_KEY}
 
 
-def git_context():
+def git_context() -> Dict[str, object]:
     repo = os.environ.get("REPO", "/")
     owner, _, name = repo.partition("/")
     pr = os.environ.get("PR_NUMBER") or ""
@@ -21,14 +28,14 @@ def git_context():
         "repoOwner": owner,
         "repoName": name,
         "repoId": int(os.environ.get("REPO_ID") or 0),
-        "refType": "PULL_REQUEST" if pr else "BRANCH",
+        "refType": (RefType.PULL_REQUEST if pr else RefType.BRANCH).value,
         "prNumber": int(pr) if pr else None,
         "headSha": os.environ.get("HEAD_SHA") or "",
         "baseBranch": os.environ.get("BASE_BRANCH") or "",
     }
 
 
-def post(payload):
+def post(payload: Dict[str, object]) -> Dict[str, object]:
     req = urllib.request.Request(
         BASE + "/v1/eval-gate/runs",
         data=json.dumps(payload).encode(),
@@ -39,7 +46,7 @@ def post(payload):
         return json.loads(r.read().decode())
 
 
-def pull_goldens():
+def pull_goldens() -> List[Dict[str, object]]:
     url = BASE + "/v1/datasets/" + ALIAS + "?version=" + VERSION
     req = urllib.request.Request(url, headers=headers(), method="GET")
     with urllib.request.urlopen(req, timeout=120) as r:
@@ -48,7 +55,7 @@ def pull_goldens():
     return body.get("goldens", [])
 
 
-def report_crash(error):
+def report_crash(error: str) -> None:
     print("eval-gate: app failure: " + str(error), file=sys.stderr)
     try:
         post({"git": git_context(), "execution": {"crashed": True, "error": str(error)}})
@@ -57,7 +64,7 @@ def report_crash(error):
     sys.exit(1)
 
 
-def main():
+def main() -> None:
     sys.path.insert(0, os.getcwd())
     try:
         from confident_eval import run
