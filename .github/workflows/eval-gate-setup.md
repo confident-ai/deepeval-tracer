@@ -112,7 +112,7 @@ jobs:
           fi
           OIDC=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
             "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=confident-eval-gate-setup" | jq -r '.value')
-          curl -sS -X POST "${API_BASE_URL}/v1/eval-gate/setup-callback" \
+          curl -sS -X POST "${API_BASE_URL}/v1/eval-gate/callback" \
             -H "Content-Type: application/json" \
             -d "$(jq -n \
                   --arg jobId "$JOB_ID" \
