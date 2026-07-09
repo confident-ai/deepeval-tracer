@@ -75,6 +75,10 @@ safe-outputs:
     # The agent writes a workflow + confident_eval.py and may edit dependency
     # manifests; PR review is the guardrail.
     protected-files: allowed
+    # The setup PR adds .github/workflows/confident-eval-gate.yml. gh-aw does not
+    # auto-infer workflows:write on the minted App token, so request it here or the
+    # push is rejected ("Resource not accessible by integration") and falls back to an issue.
+    allow-workflows: true
     title-prefix: "[eval-gate] "
     labels: ["confident-ai", "eval-gate"]
     expires: 7
