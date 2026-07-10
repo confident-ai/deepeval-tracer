@@ -158,7 +158,7 @@ Inspect `./target-repo` and confirm it contains an LLM application (LLM API call
 
 ## Step 2 — Write `confident_eval.py`
 
-Write `./target-repo/confident_eval.py` with `def run(input):` that imports and calls the app and returns its string output. Keep it minimal and correct. If — after genuinely investigating — you cannot determine how to call the app, write a **stub** that raises `NotImplementedError("Implement run() to call your app")`, and record exactly what's missing for the PR body (Step 5). Do not guess wildly.
+Write `./target-repo/confident_eval.py` with `def run(input):` that imports and calls the app and returns its string output. Keep it minimal and correct. Include brief comments capturing the contract so a later customer edit doesn't silently break the gate: the file must stay at the repo root, the function must stay named `run` and take exactly one `input` argument, and it must return the output **as a string** (the runner str()-coerces the return, so returning `None` is scored against the text "None", not a real answer). If — after genuinely investigating — you cannot determine how to call the app, write a **stub** that raises `NotImplementedError("Implement run() to call your app")`, and record exactly what's missing for the PR body (Step 5). Do not guess wildly.
 
 ## Step 3 — Write the CI workflow
 
@@ -166,6 +166,8 @@ Write `./target-repo/.github/workflows/confident-eval-gate.yml`. Base it on this
 
 ```yaml
 name: Confident PR Eval Gate
+# Keep these triggers so the gate runs on every pull request (and refreshes the
+# baseline on pushes to the default branch).
 on:
   pull_request:
   push:
@@ -186,6 +188,7 @@ jobs:
           python-version: "3.12" # match the version the repo targets
       - name: Install dependencies
         run: pip install -r requirements.txt # match the repo (poetry/uv/etc.)
+      # Managed by Confident — keep this step and its inputs as-is.
       - name: Confident PR Eval Gate
         uses: confident-ai/deepeval-tracer/actions/eval-gate@v1
         with:
