@@ -82,7 +82,7 @@ def main() -> None:
     try:
         for golden in goldens:
             inp = golden.get("input")
-            output = run(inp)
+            output = str(run(inp))
             case = {"input": inp, "actualOutput": output}
             if golden.get("expectedOutput") is not None:
                 case["expectedOutput"] = golden["expectedOutput"]
@@ -95,7 +95,11 @@ def main() -> None:
         report_crash("app raised while producing outputs: " + str(e))
         return
 
-    resp = post({"git": git_context(), "llmTestCases": test_cases})
+    try:
+        resp = post({"git": git_context(), "llmTestCases": test_cases})
+    except Exception as e:
+        report_crash("failed to submit results: " + str(e))
+        return
     print(json.dumps(resp))
 
 
