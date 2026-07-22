@@ -190,7 +190,7 @@ jobs:
         run: pip install -r requirements.txt # match the repo (poetry/uv/etc.)
       # Managed by Confident — keep this step and its inputs as-is.
       - name: Confident PR Eval Gate
-        uses: confident-ai/deepeval-tracer/actions/eval-gate@v1
+        uses: confident-ai/deepeval-actions/actions/eval-gate@v1
         with:
           base_url: "${{ inputs.apiBaseUrl }}"
           dataset_alias: "${{ inputs.datasetAlias }}"

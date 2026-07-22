@@ -1,4 +1,4 @@
-# deepeval-tracer
+# deepeval-actions
 
 The automation behind Confident AI's one-click tracing setup. When you connect a
 repository during onboarding, it opens a pull request that adds
@@ -27,7 +27,7 @@ on GitHub Actions.
 
 ```bash
 gh extension install github/gh-aw
-gh aw add https://github.com/confident-ai/deepeval-tracer/blob/main/.github/workflows/add-tracing.md
+gh aw add https://github.com/confident-ai/deepeval-actions/blob/main/.github/workflows/add-tracing.md
 gh aw secrets set ANTHROPIC_API_KEY --value "sk-ant-..."
 gh aw run add-tracing
 ```
@@ -35,5 +35,5 @@ gh aw run add-tracing
 Or try it against your repo in a throwaway sandbox first (nothing installed, no changes made):
 
 ```bash
-gh aw trial https://github.com/confident-ai/deepeval-tracer/blob/main/.github/workflows/add-tracing.md --clone-repo your-org/your-repo --dry-run
+gh aw trial https://github.com/confident-ai/deepeval-actions/blob/main/.github/workflows/add-tracing.md --clone-repo your-org/your-repo --dry-run
 ```
